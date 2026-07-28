@@ -1,0 +1,39 @@
+name: Deploy Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Create Deployment Package
+        run: |
+          zip lambda.zip lambda_function.py
+
+      - name: Upload Package to S3
+        run: |
+          aws s3 cp lambda.zip s3://github-cicd-deployment-bucket/lambda.zip
+
+      - name: Update Lambda Function
+        run: |
+          aws lambda update-function-code \
+            --function-name veeva_document_fetcher \
+            --s3-bucket github-cicd-deployment-bucket \
+            --s3-key lambda.zip
