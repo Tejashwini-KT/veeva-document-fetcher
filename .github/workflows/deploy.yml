@@ -17,6 +17,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Debug Branch
+        run: |
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Ref: $GITHUB_REF"
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
